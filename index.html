@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1-сынып Информатика - Компьютермен танысу</title>
+    <!-- Canvas Confetti кітапханасы (Салют эффектілері үшін) -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #ff6b6b;
+            --secondary-color: #f0f8ff;
+            --accent-color: #4cd137;
+            --danger-color: #e84118;
+            --text-color: #2f3640;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #009432;
+            margin-bottom: 5px;
+            font-size: 26px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #57606f;
+            font-size: 15px;
+            margin-bottom: 25px;
+        }
+
+        /* Тіркелу формасы */
+        .auth-box {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px dashed #ffeaa7;
+        }
+
+        .auth-box label {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .auth-box input {
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .btn {
+            background-color: #009432;
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .btn:hover {
+            background-color: #006266;
+        }
+
+        /* Тест бөлімі */
+        #test-section {
+            display: none;
+        }
+
+        .question-card {
+            background: #f1f2f6;
+            border-left: 6px solid #009432;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .question-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #2f3640;
+        }
+
+        .options label {
+            display: block;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            background: #fff;
+            border: 2px solid #dcdde1;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 16px;
+        }
+
+        .options label:hover {
+            background: #e8f4f8;
+            border-color: #009432;
+        }
+
+        .options input {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        /* Нәтиже бөлімі */
+        #result-section {
+            display: none;
+            text-align: center;
+        }
+
+        .result-score {
+            font-size: 28px;
+            font-weight: bold;
+            color: #009432;
+            margin: 20px 0;
+        }
+
+        .excel-btn {
+            background-color: #27ae60;
+            margin-top: 15px;
+        }
+        .excel-btn:hover {
+            background-color: #219653;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>iTest: Информатика (1-сынып)</h2>
+    <div class="subtitle">Тақырып: Компьютермен танысу (Құрылғылар және қауіпсіздік)</div>
+
+    <!-- 1. Оқушы мәліметтерін енгізу -->
+    <div id="auth-section" class="auth-box">
+        <h3>Оқушы туралы мәліметтер</h3>
+        <label for="fullName">Оқушының аты-жөні:</label>
+        <input type="text" id="fullName" placeholder="Мысалы: Бақтияр Мақсатұлы" required>
+
+        <label for="studentClass">Сыныбы:</label>
+        <input type="text" id="studentClass" placeholder="Мысалы: 1 'А'" required>
+
+        <label for="testDate">Күні:</label>
+        <input type="date" id="testDate" required>
+
+        <button class="btn" onclick="startTest()">Тестті бастау 🚀</button>
+    </div>
+
+    <!-- 2. Тест сұрақтары -->
+    <div id="test-section">
+        <div id="questions-container"></div>
+        <button class="btn" onclick="submitTest()">Тестті аяқтау</button>
+    </div>
+
+    <!-- 3. Нәтиже және жүктеу -->
+    <div id="result-section">
+        <h3>Керемет! Тест аяқталды! 🎉</h3>
+        <div class="result-score" id="scoreDisplay"></div>
+        <button class="btn excel-btn" onclick="downloadExcel()">Нәтижені Excel (.csv) форматында жүктеу 📊</button>
+    </div>
+</div>
+
+<script>
+    // 1.1.1.1 және 1.1.1.2 оқыту мақсаттарына сай 1-сыныпқа арналған сұрақтар
+    const questions = [
+        {
+            id: 1,
+            question: "1. Суретті немесе ақпаратты экраннан көруге арналған негізгі құрылғы қалай аталады?",
+            options: [
+                "Пернетақта",
+                "Монитор",
+                "Тінтуір",
+                "Жүйелік блок"
+            ],
+            answer: 1
+        },
+        {
+            id: 2,
+            question: "2. Компьютерге мәтін мен сандарды теру үшін не қолданылады?",
+            options: [
+                "Пернетақта",
+                "Монитор",
+                "Колонка",
+                "Құлаққап"
+            ],
+            answer: 0
+        },
+        {
+            id: 3,
+            question: "3. Компьютерді басқаруға, курсорды жылжытуға көмектесетін құрылғы:",
+            options: [
+                "Принтер",
+                "Тінтуір (мышь)",
+                "Сканер",
+                "Монитор"
+            ],
+            answer: 1
+        },
+        {
+            id: 4,
+            question: "4. Компьютердің «миы» болып саналатын және барлық негізгі бөлшектері орналасқан қорап қалай аталады?",
+            options: [
+                "Жүйелік блок",
+                "Флешка",
+                "Колонка",
+                "Қалам"
+            ],
+            answer: 0
+        },
+        {
+            id: 5,
+            question: "5. Цифрлық құрылғылармен (компьютер, планшет) жұмыс жасағанда қандай қауіпсіздік ережесін сақтау керек?",
+            options: [
+                "Қолды су күйінде ұстап түймелерді басу",
+                "Компьютерге жақын отырып тамақ ішу",
+                "Компьютерге тек таза, құрғақ қолмен отыру және арақашықтықты сақтау",
+                "Мониторды қатты ұрып тексеру"
+            ],
+            answer: 2
+        }
+    ];
+
+    let studentData = {};
+    let userAnswers = {};
+
+    function startTest() {
+        const name = document.getElementById('fullName').value.trim();
+        const sClass = document.getElementById('studentClass').value.trim();
+        const date = document.getElementById('testDate').value;
+
+        if (!name || !sClass || !date) {
+            alert("Барлық жолақтарды толтырыңыз!");
+            return;
+        }
+
+        studentData = { name, sClass, date };
+
+        document.getElementById('auth-section').style.display = 'none';
+        document.getElementById('test-section').style.display = 'block';
+
+        renderQuestions();
+    }
+
+    function renderQuestions() {
+        const container = document.getElementById('questions-container');
+        let html = '';
+
+        questions.forEach((q, qIndex) => {
+            html += `<div class="question-card">
+                <div class="question-title">${q.question}</div>
+                <div class="options">`;
+            
+            q.options.forEach((opt, oIndex) => {
+                html += `<label>
+                    <input type="radio" name="q${qIndex}" value="${oIndex}" onchange="checkAnswer(${qIndex}, ${oIndex})">
+                    ${opt}
+                </label>`;
+            });
+
+            html += `</div></div>`;
+        });
+
+        container.innerHTML = html;
+    }
+
+    // Әр жауап сайын эмоциялық салют / визуалды эффект
+    function checkAnswer(qIndex, selectedOption) {
+        userAnswers[qIndex] = selectedOption;
+        const correctOpt = questions[qIndex].answer;
+
+        if (selectedOption === correctOpt) {
+            // Дұрыс жауап үшін қуанышты үлкен салют
+            confetti({
+                particleCount: 80,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        } else {
+            // Қате жауап үшін шағын қызғылт/қызыл екпін (1-сыныпқа түсінікті болу үшін жұмсақ реңк)
+            confetti({
+                particleCount: 20,
+                spread: 30,
+                colors: ['#ff4757', '#ff6b81'],
+                origin: { y: 0.8 }
+            });
+        }
+    }
+
+    function submitTest() {
+        if (Object.keys(userAnswers).length < questions.length) {
+            if (!confirm("Барлық сұрақтарға жауап берген жоқсыз. Тестті аяқтағыңыз келе ме?")) {
+                return;
+            }
+        }
+
+        let score = 0;
+        questions.forEach((q, index) => {
+            if (userAnswers[index] === q.answer) {
+                score++;
+            }
+        });
+
+        document.getElementById('test-section').style.display = 'none';
+        document.getElementById('result-section').style.display = 'block';
+        document.getElementById('scoreDisplay').innerText = `Сіздің жинаған балыңыз: ${score} / ${questions.length}`;
+
+        // Қорытынды мерекелік салют
+        confetti({
+            particleCount: 160,
+            spread: 100,
+            origin: { y: 0.4 }
+        });
+    }
+
+    function downloadExcel() {
+        let scoreText = document.getElementById('scoreDisplay').innerText;
+        
+        let csvContent = "\uFEFF"; // Excel дұрыс ашуы үшін UTF-8 BOM
+        csvContent += "Оқушының аты-жөні,Сыныбы,Күні,Нәтижесі\n";
+        csvContent += `"${studentData.name}","${studentData.studentClass}","${studentData.date}","${scoreText}"\n`;
+
+        let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        let url = URL.createObjectURL(blob);
+        let a = document.createElement('a');
+        a.href = url;
+        a.download = `1Class_Informatics_Test_${studentData.name}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+</script>
+
+</body>
+</html>
